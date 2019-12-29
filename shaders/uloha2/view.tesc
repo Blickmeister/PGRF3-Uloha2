@@ -3,8 +3,11 @@
 //layout (vertices = 3) out;
 
 layout (vertices = 3) out;
-
+const float pi = 3.14159265359;
 uniform float time;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
 
 // výpočet koule
 vec3 getSphere(vec2 vec) {
@@ -22,6 +25,23 @@ vec3 getSphere(vec2 vec) {
 // získání z hodnoty
 float getFValue(vec2 vec){
         return -(vec.x*vec.x*5+vec.y*vec.y*5);
+}
+
+// Weierstrassova funkce
+float weier(vec2 vec){
+    float x = vec.x;
+    float y = vec.y;
+    float a = 0.5;
+    float b = 5;
+    float z;
+    int n = 1;
+    //z = pow(a, n)*cos(pi*pow(b, n)*(vec.x+vec.y));
+    z = pow(a, n)*cos(pi*pow(b, n)*x) + pow(a, n+1)*cos(pi*pow(b,n+1)*x);
+   // for (n = 2; n <= 10; n++) {
+        //z = z + pow(a, n)*cos(pi*pow(b, n)*(vec.x+vec.y));
+       // z = z + pow(a, n)*cos(pi*pow(b, n)*x);
+    //}
+    return z;
 }
 
 void main() {
@@ -49,11 +69,10 @@ void main() {
     //     gl_out[gl_InvocationID].gl_Position = vec4(0,0,0,1);
     //else
 
-    //vec4 pos = vec4(getSphere(gl_in[gl_InvocationID].gl_Position.xy),1.0);
-    vec4 pos = vec4(gl_in[gl_InvocationID].gl_Position.xy, getFValue(gl_in[gl_InvocationID].gl_Position.xy), 1.0);
+    //vec4 pos =
 
-
-    gl_out[gl_InvocationID].gl_Position = pos;
+    vec4 pos = vec4(gl_in[gl_InvocationID].gl_Position.xy, weier(gl_in[gl_InvocationID].gl_Position.xy), 1.0);
+    gl_out[gl_InvocationID].gl_Position = proj * view * model * pos;
 
     //gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 

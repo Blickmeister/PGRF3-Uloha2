@@ -1,13 +1,16 @@
 #version 440
-layout(location = 1) in vec2 inPosition; // vstup z vertex bufferu
+layout(location = 1) in vec2 inPosition;// vstup z vertex bufferu
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
+const float pi = 3.14159265359;
+//uniform int n;
+uniform int objType;
 
 // výpočet koule
 vec3 getSphere(vec2 vec) {
-    float az = vec.x * 3.14 *2;
-    float ze = vec.y * 3.14;
+    float az = vec.x * pi *2;
+    float ze = vec.y * pi;
     float r = 1;
 
     float x = r*cos(az)*cos(ze);
@@ -22,9 +25,8 @@ float getFValue(vec2 vec){
     return -(vec.x*vec.x*5+vec.y*vec.y*5);
 }
 
-
 void main() {
     vec2 position = inPosition - 0.5;
-    vec4 pos =  vec4( position, 0.0, 1.0 );
-    gl_Position = pos;
+    vec4 pos;
+    gl_Position = vec4(position, 0.0, 1.0);
 }

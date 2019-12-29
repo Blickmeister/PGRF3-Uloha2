@@ -27,15 +27,15 @@ public class Renderer extends AbstractRenderer {
     double ox, oy;
     boolean mouseButton1, mouseButton2 = false;
 
-    OGLBuffers buffers;
+    OGLBuffers buffers, buffersAxis;
     OGLTexture2D texture;
 
-    int shaderProgramView;
+    int shaderProgramView, shaderProgramAxis;
 
-    int width, height;
+    int width, height, n;
 
     // uniform lokátory
-    int locMathModelView, locMathViewView, locMathProjView, locTime;
+    int locMathModelView, locMathViewView, locMathProjView, locMathModelAxis, locMathViewAxis, locMathProjAxis, locTime, locN, locObjectType;
 
     // proměnné pro přepínání módů
     boolean wireframe = false;
@@ -227,7 +227,18 @@ public class Renderer extends AbstractRenderer {
             System.out.print(indexBufferData[i] + "  ");
         }
 
+        float[] vertexBufferAxis = new float[] {-40,0,0,40,0,0,
+        0,-40,0,0,40,0,
+                0,0,-40,0,0,40};
+        int[] indexBufferAxis = new int[] {0,1,2,3,4,5};
+
         // nabindování a vlastnosti VB
+        OGLBuffers.Attrib[] attributesAxis = {
+                new OGLBuffers.Attrib("inPositionAxis", 3), // 3 floats
+        };
+        buffersAxis = new OGLBuffers(vertexBufferAxis, attributesAxis,
+                indexBufferAxis);
+
         OGLBuffers.Attrib[] attributes = {
                 new OGLBuffers.Attrib("inPosition", 2), // 2 floats
         };
@@ -249,9 +260,10 @@ public class Renderer extends AbstractRenderer {
 
         // init shaderu
         shaderProgramView = ShaderUtils.loadProgram("/uloha2/view");
+        shaderProgramAxis = ShaderUtils.loadProgram("/uloha2/axis");
 
         // nastavení aktuálního shaderu
-        glUseProgram(this.shaderProgramView);
+        glUseProgram(shaderProgramView);
 
         // načtení textury
         /*try {
@@ -260,18 +272,26 @@ public class Renderer extends AbstractRenderer {
             e.printStackTrace();
         }*/
 
+        n = 1;
+
         // init lokátorů
         locMathModelView = glGetUniformLocation(shaderProgramView, "model");
         locMathViewView = glGetUniformLocation(shaderProgramView, "view");
         locMathProjView = glGetUniformLocation(shaderProgramView, "proj");
         locTime = glGetUniformLocation(shaderProgramView, "time");
+        locObjectType = glGetUniformLocation(shaderProgramView, "objType");
+        locN = glGetUniformLocation(shaderProgramView, "n");
+
+        locMathModelAxis = glGetUniformLocation(shaderProgramAxis, "model");
+        locMathViewAxis = glGetUniformLocation(shaderProgramAxis, "view");
+        locMathProjAxis = glGetUniformLocation(shaderProgramAxis, "proj");
 
         textRenderer = new OGLTextRenderer(width, height);
 
         // definice kamery
-        cam = cam.withPosition(new Vec3D(12, 12, 8))
-                .withAzimuth(Math.PI * 1.25)
-                .withZenith(Math.PI * -0.125);
+        cam = cam.withPosition(new Vec3D(0, 10, 0))
+                .withAzimuth(Math.PI * 1.50)
+                .withZenith(Math.PI * -0.020);
     }
 
     // metoda pro renderování z pohledu kamery do obrazovky
@@ -284,19 +304,35 @@ public class Renderer extends AbstractRenderer {
         if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        if(n<50) n++;
+
         // uniform proměnné pro renderování z pohledu kamery
         glUniform1f(locTime, time);
         glUniformMatrix4fv(locMathViewView, false,
                 cam.getViewMatrix().floatArray());
         glUniformMatrix4fv(locMathProjView, false,
                 proj.floatArray());
+        glUniform1i(locN, n);
 
-
-        // modelová transformace a vykreslení
+        // Weierstrassova funkce
+        //glUseProgram(shaderProgramView);
+        //glUniform1i(locObjectType, 1);
         glUniformMatrix4fv(locMathModelView, false,
                 new Mat4Scale(2).floatArray());
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         buffers.draw(GL_PATCHES, shaderProgramView);
+
+
+        // modelová transformace a vykreslení
+        // osy
+        glUseProgram(shaderProgramAxis);
+        //glUniform1i(locObjectType, 0);
+        //glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glUniformMatrix4fv(locMathViewAxis, false,
+                cam.getViewMatrix().floatArray());
+        glUniformMatrix4fv(locMathProjAxis, false,
+                proj.floatArray());
+        buffersAxis.draw(GL_LINES, shaderProgramAxis);
 
         // popis ovládání
         String textCamera = new String(this.getClass().getName() + ": [LMB] a WSAD↑↓ -> Camera; SPACE -> First person");

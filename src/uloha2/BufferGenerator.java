@@ -28,7 +28,7 @@ public class BufferGenerator {
         vertexBufferData = new float[m * n * 2];
         //vertexBufferData[0] = 0;
 
-        float interval = (float) 1 / (m - 1);
+        float interval = (float) 5 / (m - 1);
 
         float x = 0;
         float y = 0;

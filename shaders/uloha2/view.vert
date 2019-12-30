@@ -1,32 +1,40 @@
 #version 440
 layout(location = 1) in vec2 inPosition;// vstup z vertex bufferu
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-const float pi = 3.14159265359;
-//uniform int n;
 uniform int objType;
+uniform int view3D;
+uniform float b;
+uniform int N;
 
-// výpočet koule
-vec3 getSphere(vec2 vec) {
-    float az = vec.x * pi *2;
-    float ze = vec.y * pi;
-    float r = 1;
+const float pi = 3.14159265359;
 
-    float x = r*cos(az)*cos(ze);
-    float y = r*sin(az)*cos(ze);
-    float z = r*sin(ze);
-
-    return vec3(x, y, z);
-}
-
-// získání z hodnoty
-float getFValue(vec2 vec){
-    return -(vec.x*vec.x*5+vec.y*vec.y*5);
+// Weierstrassova funkce
+//počet iterací nastavuje uživatel (omezeno na 50) a parametr b se inkrementuje v animaci (omezeno na 5)
+vec3 weier(vec2 vec){
+    const float a = 0.8; // interval 0-1
+    float x;
+    float y;
+    if(view3D == 1) {
+        x = vec.x;
+        y = vec.y;
+    } else {
+        x = vec.x;
+        y = 0;
+    }
+    float z;
+    int n = 0;
+    z = pow(a, n)*cos(pi*pow(b, n)*x);
+    for (int n = 1; n <= N; n++) {
+     z = z + pow(a, n)*cos(pi*pow(b, n)*x);
+    }
+    return vec3(x,y,z);
 }
 
 void main() {
-    vec2 position = inPosition - 0.5;
+    vec2 position = inPosition - 2.5;
     vec4 pos;
-    gl_Position = vec4(position, 0.0, 1.0);
+        gl_Position = proj * view * model * vec4(weier(position), 1.0);
 }

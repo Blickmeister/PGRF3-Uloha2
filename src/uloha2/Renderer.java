@@ -28,25 +28,30 @@ public class Renderer extends AbstractRenderer {
     boolean mouseButton1, mouseButton2 = false;
 
     OGLBuffers buffers, buffersAxis;
-    OGLTexture2D texture;
 
     int shaderProgramView, shaderProgramAxis;
 
     int width, height, n;
+    float b;
 
     // uniform lokátory
-    int locMathModelView, locMathViewView, locMathProjView, locMathModelAxis, locMathViewAxis, locMathProjAxis, locTime, locN, locObjectType;
+    int locMathModelView, locMathViewView, locMathProjView,
+            locMathModelAxis, locMathViewAxis, locMathProjAxis, locTime, locN, locB,
+            locObjectType, locView;
 
     // proměnné pro přepínání módů
     boolean wireframe = false;
-    boolean persp = true;
+    boolean view3D = false;
+    boolean startAnim = true;
+    boolean resetAnim = false;
 
     // proměnné pro shadery
     float time = 0;
 
     // proměnné pro TextRenderer
-    String projectionString = "Persp";
+    String viewString = "2D";
     String wireframeString = "Fill";
+    String startAnimString = "Zapnuta";
 
     // vytvoření kamery a definice projekce
     Camera cam = new Camera();
@@ -87,14 +92,14 @@ public class Renderer extends AbstractRenderer {
                     case GLFW_KEY_R:
                         time -= 1;
                         break;
-                    // perspektivni/ortogonalni
+                    // 2D/3D zobrazení
                     case GLFW_KEY_P:
-                        if(persp) {
-                            projectionString = "Ortho";
-                            persp = false;
+                        if(view3D) {
+                            viewString = "2D";
+                            view3D = false;
                         } else {
-                            projectionString = "Persp";
-                            persp = true;
+                            viewString = "3D";
+                            view3D = true;
                         }
                         break;
                     case GLFW_KEY_F:
@@ -107,6 +112,37 @@ public class Renderer extends AbstractRenderer {
                             wireframe = true;
                         }
                         break;
+                    case GLFW_KEY_KP_ADD:
+                        // inkrementace proměnné ve vybrané funkci
+                        if(n < 50) {
+                            n++;
+                        } else {
+                            n = 50;
+                        }
+                        break;
+                    case GLFW_KEY_KP_SUBTRACT:
+                        // dekrementace proměnné ve vybrané funkci
+                        if(n > 1) {
+                            n--;
+                        } else {
+                            n = 1;
+                        }
+                        break;
+                    case GLFW_KEY_ENTER:
+                        // zapnutí/vypnutí animace
+                        if(startAnim) {
+                            startAnimString = "Vypnuta";
+                            startAnim = false;
+                        } else {
+                            startAnimString = "Zapnuta";
+                            startAnim = true;
+                        }
+                        break;
+                    case GLFW_KEY_BACKSPACE:
+                        // reset animace
+                        if(!resetAnim) {
+                            resetAnim = true;
+                        }
                 }
             }
         }
@@ -219,17 +255,17 @@ public class Renderer extends AbstractRenderer {
         float[] vertexBufferData = buf.getVertexBufferData();
         int[] indexBufferData = buf.getIndexBufferData();
 
-        for (int i = 0; i < vertexBufferData.length; i++) {
+        /*for (int i = 0; i < vertexBufferData.length; i++) {
             System.out.print(vertexBufferData[i] + "  ");
         }
 
         for (int i = 0; i < indexBufferData.length; i++) {
             System.out.print(indexBufferData[i] + "  ");
-        }
+        }*/
 
-        float[] vertexBufferAxis = new float[] {-40,0,0,40,0,0,
-        0,-40,0,0,40,0,
-                0,0,-40,0,0,40};
+        float[] vertexBufferAxis = new float[] {-4,0,0,4,0,0,
+        0,-4,0,0,4,0,
+                0,0,-4,0,0,4};
         int[] indexBufferAxis = new int[] {0,1,2,3,4,5};
 
         // nabindování a vlastnosti VB
@@ -256,7 +292,7 @@ public class Renderer extends AbstractRenderer {
         // Set the clear color
         glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
 
-        createBuffers(20); // 100x100 grid
+        createBuffers(200); // 200x200 grid
 
         // init shaderu
         shaderProgramView = ShaderUtils.loadProgram("/uloha2/view");
@@ -272,7 +308,8 @@ public class Renderer extends AbstractRenderer {
             e.printStackTrace();
         }*/
 
-        n = 1;
+        n = 10;
+        b = 1;
 
         // init lokátorů
         locMathModelView = glGetUniformLocation(shaderProgramView, "model");
@@ -280,7 +317,9 @@ public class Renderer extends AbstractRenderer {
         locMathProjView = glGetUniformLocation(shaderProgramView, "proj");
         locTime = glGetUniformLocation(shaderProgramView, "time");
         locObjectType = glGetUniformLocation(shaderProgramView, "objType");
-        locN = glGetUniformLocation(shaderProgramView, "n");
+        locView = glGetUniformLocation(shaderProgramView, "view3D");
+        locN = glGetUniformLocation(shaderProgramView, "N");
+        locB = glGetUniformLocation(shaderProgramView, "b");
 
         locMathModelAxis = glGetUniformLocation(shaderProgramAxis, "model");
         locMathViewAxis = glGetUniformLocation(shaderProgramAxis, "view");
@@ -301,12 +340,27 @@ public class Renderer extends AbstractRenderer {
         glUseProgram(shaderProgramView);
 
         // přepínání mezi drátovým modelem a vyplněnými plochami
-        if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if(view3D) {
+            glUniform1i(locView, 1);
+            if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        } else {
+            glUniform1i(locView, 0);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
 
-        if(n<50) n++;
+        if(startAnim) {
+            if(b<5) b+=0.01;
+        }
 
-        // uniform proměnné pro renderování z pohledu kamery
+        if(resetAnim) {
+            b = 1;
+            resetAnim = false;
+        }
+
+        // uniform proměnné pro renderování
+        glUniform1i(locN, n);
+        glUniform1f(locB, b);
         glUniform1f(locTime, time);
         glUniformMatrix4fv(locMathViewView, false,
                 cam.getViewMatrix().floatArray());
@@ -316,18 +370,15 @@ public class Renderer extends AbstractRenderer {
 
         // Weierstrassova funkce
         //glUseProgram(shaderProgramView);
-        //glUniform1i(locObjectType, 1);
+        //glUniform1i(locObjectType, 0);
         glUniformMatrix4fv(locMathModelView, false,
                 new Mat4Scale(2).floatArray());
         glPatchParameteri(GL_PATCH_VERTICES, 3);
         buffers.draw(GL_PATCHES, shaderProgramView);
 
-
-        // modelová transformace a vykreslení
         // osy
         glUseProgram(shaderProgramAxis);
         //glUniform1i(locObjectType, 0);
-        //glPatchParameteri(GL_PATCH_VERTICES, 3);
         glUniformMatrix4fv(locMathViewAxis, false,
                 cam.getViewMatrix().floatArray());
         glUniformMatrix4fv(locMathProjAxis, false,
@@ -336,14 +387,21 @@ public class Renderer extends AbstractRenderer {
 
         // popis ovládání
         String textCamera = new String(this.getClass().getName() + ": [LMB] a WSAD↑↓ -> Camera; SPACE -> First person");
+        String textView = new String("P -> Zobrazení: " + viewString);
         String textWireframe = new String("F -> Fill/Line: " + wireframeString);
+        String textAnimation = new String("Enter -> Animace inkrementace podle N: " + startAnimString);
+        String textresetAnimation = new String("Reset animace -> Backspace");
         String innerLevel = new String("E -> + innerLevel; R -> - innerLevel");
         String innerLevel2 = new String("innerLevel: " + time);
         textRenderer.clear();
         textRenderer.addStr2D(5, 30, textCamera);
-        textRenderer.addStr2D(5, 60, textWireframe);
-        textRenderer.addStr2D(5, 90, innerLevel);
-        textRenderer.addStr2D(5, 120, innerLevel2);
+        textRenderer.addStr2D(5, 60, textView);
+        if(view3D) textRenderer.addStr2D(5, 90, textWireframe);
+        textRenderer.addStr2D(5, 120, textAnimation);
+        textRenderer.addStr2D(5, 150, textresetAnimation);
+        textRenderer.addStr2D(5, 180, new String("parametry funkce: B: " + b + " N: " + n));
+        textRenderer.addStr2D(5, 210, innerLevel);
+        textRenderer.addStr2D(5, 240, innerLevel2);
         textRenderer.addStr2D(width - 520, height - 10, "Autor: Bc. Ondřej Schneider (c) PGRF3 UHK");
         textRenderer.draw();
     }

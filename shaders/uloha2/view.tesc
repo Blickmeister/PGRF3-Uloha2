@@ -27,30 +27,13 @@ float getFValue(vec2 vec){
         return -(vec.x*vec.x*5+vec.y*vec.y*5);
 }
 
-// Weierstrassova funkce
-float weier(vec2 vec){
-    float x = vec.x;
-    float y = vec.y;
-    float a = 0.5;
-    float b = 5;
-    float z;
-    int n = 1;
-    //z = pow(a, n)*cos(pi*pow(b, n)*(vec.x+vec.y));
-    z = pow(a, n)*cos(pi*pow(b, n)*x) + pow(a, n+1)*cos(pi*pow(b,n+1)*x);
-   // for (n = 2; n <= 10; n++) {
-        //z = z + pow(a, n)*cos(pi*pow(b, n)*(vec.x+vec.y));
-       // z = z + pow(a, n)*cos(pi*pow(b, n)*x);
-    //}
-    return z;
-}
-
 void main() {
 
     if (gl_InvocationID == 0){
         gl_TessLevelInner[0] = time;
-        gl_TessLevelOuter[0] = 3.0;
-        gl_TessLevelOuter[1] = 4.0;
-        gl_TessLevelOuter[2] = 2.0;
+        gl_TessLevelOuter[0] = 3;
+        gl_TessLevelOuter[1] = 5;
+        gl_TessLevelOuter[2] = 4;
     }
     /*if (gl_InvocationID == 1){
         gl_TessLevelInner[0] = 2.0;
@@ -65,15 +48,6 @@ void main() {
         gl_TessLevelOuter[2] = 2.0;
     }*/
 
-    //if (gl_InvocationID == 0)
-    //     gl_out[gl_InvocationID].gl_Position = vec4(0,0,0,1);
-    //else
-
-    //vec4 pos =
-
-    vec4 pos = vec4(gl_in[gl_InvocationID].gl_Position.xy, weier(gl_in[gl_InvocationID].gl_Position.xy), 1.0);
-    gl_out[gl_InvocationID].gl_Position = proj * view * model * pos;
-
-    //gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 
 }

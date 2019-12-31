@@ -27,7 +27,8 @@ public class Renderer extends AbstractRenderer {
     double ox, oy;
     boolean mouseButton1, mouseButton2 = false;
 
-    OGLBuffers buffers, buffersAxis;
+    OGLBuffers buffers, buffersAxis, buffersBolzano1N, buffersBolzano2N,
+    buffersBolzano3N, buffersBolzano4N, buffersBolzano5N;
 
     int shaderProgramView, shaderProgramAxis;
 
@@ -44,6 +45,13 @@ public class Renderer extends AbstractRenderer {
     boolean view3D = false;
     boolean startAnim = true;
     boolean resetAnim = false;
+    int funcType = 1;
+
+    boolean line1 = false;
+    boolean line2 = false;
+    boolean line3 = false;
+    boolean line4 = false;
+    boolean line5 = false;
 
     // proměnné pro shadery
     float time = 0;
@@ -52,6 +60,7 @@ public class Renderer extends AbstractRenderer {
     String viewString = "2D";
     String wireframeString = "Fill";
     String startAnimString = "Zapnuta";
+    String funcTypeString = "Weierstrassova funkce";
 
     // vytvoření kamery a definice projekce
     Camera cam = new Camera();
@@ -143,6 +152,37 @@ public class Renderer extends AbstractRenderer {
                         if(!resetAnim) {
                             resetAnim = true;
                         }
+                        break;
+                    case GLFW_KEY_1:
+                        // Weierstrassova fce
+                        funcType = 1;
+                        funcTypeString = "Weierstrassova funkce";
+                        break;
+                    case GLFW_KEY_2:
+                        // Bolzanova fce
+                        funcType = 2;
+                        funcTypeString = "Bolzanova funkce";
+                        break;
+                    case GLFW_KEY_KP_1:
+                        //
+                        line1 = !line1;
+                        break;
+                    case GLFW_KEY_KP_2:
+                        //
+                        line2 = !line2;
+                        break;
+                    case GLFW_KEY_KP_3:
+                        //
+                        line3 = !line3;
+                        break;
+                    case GLFW_KEY_KP_4:
+                        //
+                        line4 = !line4;
+                        break;
+                    case GLFW_KEY_KP_5:
+                        //
+                        line5 = !line5;
+                        break;
                 }
             }
         }
@@ -246,27 +286,39 @@ public class Renderer extends AbstractRenderer {
     // vytvoření gridu - VB a IB
     void createBuffers(int m) {
 
-        BufferGenerator buf = new BufferGenerator();
+        BufferGenerator bufTriangle = new BufferGenerator();
+        BufferGenerator bufLines = new BufferGenerator();
 
-        buf.createVertexBuffer(m, m);
-        buf.createIndexBuffer(m , m);
-        //buf.createIndexBufferTriangleStrips(m, m);
+        bufTriangle.createVertexBuffer(m, m);
+        bufTriangle.createIndexBuffer(m , m);
 
-        float[] vertexBufferData = buf.getVertexBufferData();
-        int[] indexBufferData = buf.getIndexBufferData();
+        bufLines.createVertexBufferForBolzano(1);
+        bufLines.createIndexBufferForBolzano1N();
+        bufLines.createIndexBufferForBolzano2N();
+        bufLines.createIndexBufferForBolzano3N();
+        bufLines.createIndexBufferForBolzano4N();
+        bufLines.createIndexBufferForBolzano5N();
 
-        /*for (int i = 0; i < vertexBufferData.length; i++) {
-            System.out.print(vertexBufferData[i] + "  ");
+        float[] vertexBufferData = bufTriangle.getVertexBufferData();
+        int[] indexBufferData = bufTriangle.getIndexBufferData();
+
+        float[] vertexBufferAxis = new float[] {-4,0,0,4,0,0,0,-4,0,0,4,0,0,0,-4,0,0,4};
+        int[] indexBufferAxis = new int[] {0,1,2,3,4,5};
+
+        float[] vertexBufferBolzano = bufLines.getVertexBufferData();
+        int[] indexBufferBolzano1N = bufLines.getIndexBufferDataBolzano1N();
+        int[] indexBufferBolzano2N = bufLines.getIndexBufferDataBolzano2N();
+        int[] indexBufferBolzano3N = bufLines.getIndexBufferDataBolzano3N();
+        int[] indexBufferBolzano4N = bufLines.getIndexBufferDataBolzano4N();
+        int[] indexBufferBolzano5N = bufLines.getIndexBufferDataBolzano5N();
+
+        for(int i = 0; i < indexBufferBolzano1N.length; i++) {
+            System.out.println(indexBufferBolzano1N[i]);
         }
 
-        for (int i = 0; i < indexBufferData.length; i++) {
-            System.out.print(indexBufferData[i] + "  ");
-        }*/
-
-        float[] vertexBufferAxis = new float[] {-4,0,0,4,0,0,
-        0,-4,0,0,4,0,
-                0,0,-4,0,0,4};
-        int[] indexBufferAxis = new int[] {0,1,2,3,4,5};
+        for(int i = 0; i < vertexBufferBolzano.length; i++) {
+            System.out.println(vertexBufferBolzano[i]);
+        }
 
         // nabindování a vlastnosti VB
         OGLBuffers.Attrib[] attributesAxis = {
@@ -280,6 +332,36 @@ public class Renderer extends AbstractRenderer {
         };
         buffers = new OGLBuffers(vertexBufferData, attributes,
                 indexBufferData);
+
+        OGLBuffers.Attrib[] attributesBolzano1N = {
+                new OGLBuffers.Attrib("inPositionBol1N", 2), // 2 floats
+        };
+
+        buffersBolzano1N = new OGLBuffers(vertexBufferBolzano, attributesBolzano1N, indexBufferBolzano1N);
+
+        OGLBuffers.Attrib[] attributesBolzano2N = {
+                new OGLBuffers.Attrib("inPositionBol2N", 2), // 2 floats
+        };
+
+        buffersBolzano2N = new OGLBuffers(vertexBufferBolzano, attributesBolzano2N, indexBufferBolzano2N);
+
+        OGLBuffers.Attrib[] attributesBolzano3N = {
+                new OGLBuffers.Attrib("inPositionBol3N", 2), // 2 floats
+        };
+
+        buffersBolzano3N = new OGLBuffers(vertexBufferBolzano, attributesBolzano3N, indexBufferBolzano3N);
+
+        OGLBuffers.Attrib[] attributesBolzano4N = {
+                new OGLBuffers.Attrib("inPositionBol4N", 2), // 2 floats
+        };
+
+        buffersBolzano4N = new OGLBuffers(vertexBufferBolzano, attributesBolzano4N, indexBufferBolzano4N);
+
+        OGLBuffers.Attrib[] attributesBolzano5N = {
+                new OGLBuffers.Attrib("inPositionBol5N", 2), // 2 floats
+        };
+
+        buffersBolzano5N = new OGLBuffers(vertexBufferBolzano, attributesBolzano5N, indexBufferBolzano5N);
     }
 
     // inicializace scény
@@ -301,13 +383,6 @@ public class Renderer extends AbstractRenderer {
         // nastavení aktuálního shaderu
         glUseProgram(shaderProgramView);
 
-        // načtení textury
-        /*try {
-            texture = new OGLTexture2D("textures/globeNormal.png");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
         n = 10;
         b = 1;
 
@@ -316,7 +391,7 @@ public class Renderer extends AbstractRenderer {
         locMathViewView = glGetUniformLocation(shaderProgramView, "view");
         locMathProjView = glGetUniformLocation(shaderProgramView, "proj");
         locTime = glGetUniformLocation(shaderProgramView, "time");
-        locObjectType = glGetUniformLocation(shaderProgramView, "objType");
+        locObjectType = glGetUniformLocation(shaderProgramAxis, "objType"); //view
         locView = glGetUniformLocation(shaderProgramView, "view3D");
         locN = glGetUniformLocation(shaderProgramView, "N");
         locB = glGetUniformLocation(shaderProgramView, "b");
@@ -368,40 +443,92 @@ public class Renderer extends AbstractRenderer {
                 proj.floatArray());
         glUniform1i(locN, n);
 
-        // Weierstrassova funkce
-        //glUseProgram(shaderProgramView);
-        //glUniform1i(locObjectType, 0);
-        glUniformMatrix4fv(locMathModelView, false,
-                new Mat4Scale(2).floatArray());
-        glPatchParameteri(GL_PATCH_VERTICES, 3);
-        buffers.draw(GL_PATCHES, shaderProgramView);
+        if(funcType == 2) {
+            glUseProgram(shaderProgramAxis);
+            if(line1) {
+                glUniform1i(locObjectType, 1);
+                glUniformMatrix4fv(locMathModelAxis, false,
+                        new Mat4Scale(2).floatArray());
+                buffersBolzano1N.draw(GL_LINES, shaderProgramAxis);
+            }
+            if(line2) {
+                glUniform1i(locObjectType, 2);
+                glUniformMatrix4fv(locMathModelAxis, false,
+                        new Mat4Scale(2).floatArray());
+                buffersBolzano2N.draw(GL_LINES, shaderProgramAxis);
+            }
+            if(line3) {
+                glUniform1i(locObjectType, 3);
+                glUniformMatrix4fv(locMathModelAxis, false,
+                        new Mat4Scale(2).floatArray());
+                buffersBolzano3N.draw(GL_LINES, shaderProgramAxis);
+            }
+            if(line4) {
+                glUniform1i(locObjectType, 4);
+                glUniformMatrix4fv(locMathModelAxis, false,
+                        new Mat4Scale(2).floatArray());
+                buffersBolzano4N.draw(GL_LINES, shaderProgramAxis);
+            }
+            if(line5) {
+                glUniform1i(locObjectType, 5);
+                glUniformMatrix4fv(locMathModelAxis, false,
+                        new Mat4Scale(2).floatArray());
+                buffersBolzano5N.draw(GL_LINES, shaderProgramAxis);
+            }
+        }
+
+        if(funcType == 1) {
+            // Weierstrassova funkce
+            //glUseProgram(shaderProgramView);
+            //glUniform1i(locObjectType, 0);
+            glUniformMatrix4fv(locMathModelView, false,
+                    new Mat4Scale(2).floatArray());
+            glPatchParameteri(GL_PATCH_VERTICES, 3);
+            buffers.draw(GL_PATCHES, shaderProgramView);
+        } //else if(funcType == 2) {
+            // Bolzanova funkce
+           /* glUniform1i(locObjectType, 1);
+            glUniformMatrix4fv(locMathModelView, false,
+                    new Mat4Scale(2).floatArray());
+            glPatchParameteri(GL_PATCH_VERTICES, 2);
+            buffersBolzano.draw(GL_PATCHES, shaderProgramView);*/
+            //glUniform1i(locObjectType, 1);
+            //glUseProgram(shaderProgramAxis);
+           // buffersBolzano.draw(GL_LINES, shaderProgramAxis);
+
+        //}
 
         // osy
         glUseProgram(shaderProgramAxis);
-        //glUniform1i(locObjectType, 0);
         glUniformMatrix4fv(locMathViewAxis, false,
                 cam.getViewMatrix().floatArray());
         glUniformMatrix4fv(locMathProjAxis, false,
                 proj.floatArray());
+        glUniform1i(locObjectType, 0);
+        glUseProgram(shaderProgramAxis);
         buffersAxis.draw(GL_LINES, shaderProgramAxis);
 
         // popis ovládání
-        String textCamera = new String(this.getClass().getName() + ": [LMB] a WSAD↑↓ -> Camera; SPACE -> First person");
-        String textView = new String("P -> Zobrazení: " + viewString);
-        String textWireframe = new String("F -> Fill/Line: " + wireframeString);
+        String textFuncType = new String("1,2 -> Vybraná funkce: " + funcTypeString);
         String textAnimation = new String("Enter -> Animace inkrementace podle N: " + startAnimString);
         String textresetAnimation = new String("Reset animace -> Backspace");
+        String textCamera = new String("[LMB] a WSAD↑↓ -> Camera; SPACE -> First person");
+        String textView = new String("P -> Zobrazení: " + viewString);
+        String textWireframe = new String("F -> Fill/Line: " + wireframeString);
         String innerLevel = new String("E -> + innerLevel; R -> - innerLevel");
         String innerLevel2 = new String("innerLevel: " + time);
         textRenderer.clear();
-        textRenderer.addStr2D(5, 30, textCamera);
-        textRenderer.addStr2D(5, 60, textView);
-        if(view3D) textRenderer.addStr2D(5, 90, textWireframe);
-        textRenderer.addStr2D(5, 120, textAnimation);
-        textRenderer.addStr2D(5, 150, textresetAnimation);
-        textRenderer.addStr2D(5, 180, new String("parametry funkce: B: " + b + " N: " + n));
-        textRenderer.addStr2D(5, 210, innerLevel);
-        textRenderer.addStr2D(5, 240, innerLevel2);
+        textRenderer.addStr2D(5, 30, textFuncType);
+        textRenderer.addStr2D(5, 60, new String("parametry funkce:"));
+        if(funcType == 1) textRenderer.addStr2D(5, 90, new String("a: 0.8 B: " + b + " N: " + n));
+        else textRenderer.addStr2D(5, 90, new String("N: " + n));
+        textRenderer.addStr2D(5, 150, textAnimation);
+        textRenderer.addStr2D(5, 180, textresetAnimation);
+        textRenderer.addStr2D(5, 240, textCamera);
+        textRenderer.addStr2D(5, 270, textView);
+        if(view3D) textRenderer.addStr2D(5, 300, textWireframe);
+        textRenderer.addStr2D(5, 360, innerLevel);
+        textRenderer.addStr2D(5, 390, innerLevel2);
         textRenderer.addStr2D(width - 520, height - 10, "Autor: Bc. Ondřej Schneider (c) PGRF3 UHK");
         textRenderer.draw();
     }

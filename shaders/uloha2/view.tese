@@ -28,7 +28,7 @@ float weier(vec2 vec){
 
 void main() {
 
-    gl_Position = proj * view * model * vec4(gl_TessCoord.x, gl_TessCoord.y, weier(gl_TessCoord.xy),1.0);
+    //gl_Position = proj * view * model * vec4(gl_TessCoord.x, gl_TessCoord.y, weier(gl_TessCoord.xy),1.0);
 
     gl_Position = gl_TessCoord.x * gl_in[0].gl_Position +
     gl_TessCoord.y * gl_in[1].gl_Position +

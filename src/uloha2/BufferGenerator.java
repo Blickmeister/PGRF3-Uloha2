@@ -10,6 +10,12 @@ public class BufferGenerator {
 
     float[] vertexBufferData = {};
     int[] indexBufferData = {};
+    int[] indexBufferDataBolzano1N = {};
+    int[] indexBufferDataBolzano2N = {};
+    int[] indexBufferDataBolzano3N = {};
+    int[] indexBufferDataBolzano4N = {};
+    int[] indexBufferDataBolzano5N = {};
+    int indexBolzano = 0;
 
     public float[] getVertexBufferData() {
         return vertexBufferData;
@@ -19,10 +25,137 @@ public class BufferGenerator {
         return indexBufferData;
     }
 
+    public int[] getIndexBufferDataBolzano1N() {
+        return indexBufferDataBolzano1N;
+    }
+
+    public int[] getIndexBufferDataBolzano2N() {
+        return indexBufferDataBolzano2N;
+    }
+
+    public int[] getIndexBufferDataBolzano3N() {
+        return indexBufferDataBolzano3N;
+    }
+
+    public int[] getIndexBufferDataBolzano4N() {
+        return indexBufferDataBolzano4N;
+    }
+
+    public int[] getIndexBufferDataBolzano5N() {
+        return indexBufferDataBolzano5N;
+    }
+
     public BufferGenerator() {
     }
 
-    // metoda pro generování vertex bufferu
+    public void createVertexBufferForBolzano(float interval) {
+
+        float a = 0;
+        float A = 0;
+        float b = a + interval;
+        float B = A + interval;
+        int i = 0;
+        int aktualniIndexA = 0;
+        int aktualniIndexB = 2;
+        final int N = 83;
+
+        vertexBufferData = new float[N * 50];
+
+        for (int n = 0; n <= N; n++) {
+            for (int j = 0; j < 4; j++) {
+                createBolzanoPoints(a, A, b, B, i);
+                i += 10;
+                a = vertexBufferData[aktualniIndexA];
+                A = vertexBufferData[++aktualniIndexA];
+                aktualniIndexA++;
+                b = vertexBufferData[aktualniIndexB];
+                B = vertexBufferData[++aktualniIndexB];
+                aktualniIndexB++;
+            }
+            aktualniIndexA += 2;
+            aktualniIndexB += 2;
+
+        }
+
+
+    }
+
+    private void createBolzanoPoints(float a, float A, float b, float B, int i) {
+        vertexBufferData[i++] = a;
+        vertexBufferData[i++] = A;
+        vertexBufferData[i++] = a + (float) 3 / 8 * (b - a);
+        vertexBufferData[i++] = A + (float) 5 / 8 * (B - A);
+        vertexBufferData[i++] = (float) 1 / 2 * (a + b);
+        vertexBufferData[i++] = (float) 1 / 2 * (A + B);
+        vertexBufferData[i++] = a + (float) 7 / 8 * (b - a);
+        vertexBufferData[i++] = A + (float) 9 / 8 * (B - A);
+        vertexBufferData[i++] = b;
+        vertexBufferData[i++] = B;
+
+    }
+
+    public void createIndexBufferForBolzano1N() {
+        indexBufferDataBolzano1N = new int[8];
+        /*for(int i = 0; i < vertexBufferData.length/2+1; i++) {
+            indexBufferData[i] = i;
+        }*/
+        int i = 0;
+        indexBufferDataBolzano1N[i++] = indexBolzano;
+        for(int j = 0; j < 3; j++) {
+            indexBufferDataBolzano1N[i++] = ++indexBolzano;
+            indexBufferDataBolzano1N[i++] = indexBolzano;
+        }
+        indexBufferDataBolzano1N[7] = ++indexBolzano;
+    }
+
+    public void createIndexBufferForBolzano2N() {
+        indexBufferDataBolzano2N = new int[38];
+
+        int i = 0;
+        indexBufferDataBolzano2N[i++] = ++indexBolzano;
+        for(int j = 0; j < 18; j++) {
+            indexBufferDataBolzano2N[i++] = ++indexBolzano;
+            indexBufferDataBolzano2N[i++] = indexBolzano;
+        }
+        indexBufferDataBolzano2N[37] = ++indexBolzano;
+    }
+
+    public void createIndexBufferForBolzano3N() {
+        indexBufferDataBolzano3N = new int[158];
+
+        int i = 0;
+        indexBufferDataBolzano3N[i++] = ++indexBolzano;
+        for(int j = 0; j < 78; j++) {
+            indexBufferDataBolzano3N[i++] = ++indexBolzano;
+            indexBufferDataBolzano3N[i++] = indexBolzano;
+        }
+        indexBufferDataBolzano3N[157] = ++indexBolzano;
+    }
+    public void createIndexBufferForBolzano4N() {
+        indexBufferDataBolzano4N = new int[626];
+
+        int i = 0;
+        indexBufferDataBolzano4N[i++] = ++indexBolzano;
+        for(int j = 0; j < 312; j++) {
+            indexBufferDataBolzano4N[i++] = ++indexBolzano;
+            indexBufferDataBolzano4N[i++] = indexBolzano;
+        }
+        indexBufferDataBolzano4N[625] = ++indexBolzano;
+    }
+    public void createIndexBufferForBolzano5N() {
+        indexBufferDataBolzano5N = new int[2504];
+
+        int i = 0;
+        indexBolzano += 6;
+        indexBufferDataBolzano5N[i++] = ++indexBolzano;
+        for(int j = 0; j < 1251; j++) {
+            indexBufferDataBolzano5N[i++] = ++indexBolzano;
+            indexBufferDataBolzano5N[i++] = indexBolzano;
+        }
+        indexBufferDataBolzano5N[2503] = ++indexBolzano;
+    }
+
+    // metoda pro generování vertex bufferu pro trojuhelníkový grid
     public void createVertexBuffer(int m, int n) {
 
         vertexBufferData = new float[m * n * 2];

@@ -15,7 +15,9 @@ public class BufferGenerator {
     int[] indexBufferDataBolzano3N = {};
     int[] indexBufferDataBolzano4N = {};
     int[] indexBufferDataBolzano5N = {};
-    int indexBolzano = 0;
+    int indexBolzano = 0; // aktuální index v IB pro spojení bodů Bolzanovy fce
+    int intervalCoef = 30; // koeficient pro určení intervalu jednotlivých IB Bolzanovy fce
+    int IBsize = 8; // interval jednotlivých IB Bolzanovy fce
 
     public float[] getVertexBufferData() {
         return vertexBufferData;
@@ -48,6 +50,7 @@ public class BufferGenerator {
     public BufferGenerator() {
     }
 
+    // Bolzanova fce - vygenerování všech bodů dle zvoleného N opakování
     public void createVertexBufferForBolzano(float interval) {
 
         float a = 0;
@@ -59,7 +62,7 @@ public class BufferGenerator {
         int aktualniIndexB = 2;
         final int N = 83;
 
-        vertexBufferData = new float[N * 50];
+        vertexBufferData = new float[N * 40 + 40];
 
         for (int n = 0; n <= N; n++) {
             for (int j = 0; j < 4; j++) {
@@ -74,12 +77,10 @@ public class BufferGenerator {
             }
             aktualniIndexA += 2;
             aktualniIndexB += 2;
-
         }
-
-
     }
 
+    // Definice 5 bodů Bolzanovy fce
     private void createBolzanoPoints(float a, float A, float b, float B, int i) {
         vertexBufferData[i++] = a;
         vertexBufferData[i++] = A;
@@ -91,68 +92,83 @@ public class BufferGenerator {
         vertexBufferData[i++] = A + (float) 9 / 8 * (B - A);
         vertexBufferData[i++] = b;
         vertexBufferData[i++] = B;
-
     }
 
+    // zobrazení Bolzanovy fce pro N = 1
     public void createIndexBufferForBolzano1N() {
-        indexBufferDataBolzano1N = new int[8];
-        /*for(int i = 0; i < vertexBufferData.length/2+1; i++) {
-            indexBufferData[i] = i;
-        }*/
+        indexBufferDataBolzano1N = new int[IBsize];
+
         int i = 0;
         indexBufferDataBolzano1N[i++] = indexBolzano;
-        for(int j = 0; j < 3; j++) {
+        for(int j = 0; j < (IBsize-2)/2; j++) {
             indexBufferDataBolzano1N[i++] = ++indexBolzano;
             indexBufferDataBolzano1N[i++] = indexBolzano;
         }
-        indexBufferDataBolzano1N[7] = ++indexBolzano;
+        indexBufferDataBolzano1N[IBsize-1] = ++indexBolzano;
+
+        IBsize += intervalCoef;
     }
 
+    // zobrazení Bolzanovy fce pro N = 2
     public void createIndexBufferForBolzano2N() {
-        indexBufferDataBolzano2N = new int[38];
+        indexBufferDataBolzano2N = new int[IBsize];
 
         int i = 0;
         indexBufferDataBolzano2N[i++] = ++indexBolzano;
-        for(int j = 0; j < 18; j++) {
+        for(int j = 0; j < (IBsize-2)/2; j++) {
             indexBufferDataBolzano2N[i++] = ++indexBolzano;
             indexBufferDataBolzano2N[i++] = indexBolzano;
         }
-        indexBufferDataBolzano2N[37] = ++indexBolzano;
+        indexBufferDataBolzano2N[IBsize-1] = ++indexBolzano;
+
+        intervalCoef *= 4;
+        IBsize += intervalCoef;
     }
 
+    // zobrazení Bolzanovy fce pro N = 3
     public void createIndexBufferForBolzano3N() {
-        indexBufferDataBolzano3N = new int[158];
+        indexBufferDataBolzano3N = new int[IBsize];
 
         int i = 0;
         indexBufferDataBolzano3N[i++] = ++indexBolzano;
-        for(int j = 0; j < 78; j++) {
+        for(int j = 0; j < (IBsize-2)/2; j++) {
             indexBufferDataBolzano3N[i++] = ++indexBolzano;
             indexBufferDataBolzano3N[i++] = indexBolzano;
         }
-        indexBufferDataBolzano3N[157] = ++indexBolzano;
+        indexBufferDataBolzano3N[IBsize-1] = ++indexBolzano;
+
+        intervalCoef *= 4;
+        IBsize += intervalCoef;
     }
+
+    // zobrazení Bolzanovy fce pro N = 4
     public void createIndexBufferForBolzano4N() {
-        indexBufferDataBolzano4N = new int[626];
+        indexBufferDataBolzano4N = new int[IBsize];
 
         int i = 0;
         indexBufferDataBolzano4N[i++] = ++indexBolzano;
-        for(int j = 0; j < 312; j++) {
+        for(int j = 0; j < (IBsize-2)/2; j++) {
             indexBufferDataBolzano4N[i++] = ++indexBolzano;
             indexBufferDataBolzano4N[i++] = indexBolzano;
         }
-        indexBufferDataBolzano4N[625] = ++indexBolzano;
+        indexBufferDataBolzano4N[IBsize-1] = ++indexBolzano;
+
+        intervalCoef *= 4;
+        IBsize += intervalCoef;
     }
+
+    // zobrazení Bolzanovy fce pro N = 5
     public void createIndexBufferForBolzano5N() {
-        indexBufferDataBolzano5N = new int[2504];
+        IBsize -= 54;
+        indexBufferDataBolzano5N = new int[IBsize];
 
         int i = 0;
-        indexBolzano += 6;
         indexBufferDataBolzano5N[i++] = ++indexBolzano;
-        for(int j = 0; j < 1251; j++) {
+        for(int j = 0; j < (IBsize-2)/2; j++) {
             indexBufferDataBolzano5N[i++] = ++indexBolzano;
             indexBufferDataBolzano5N[i++] = indexBolzano;
         }
-        indexBufferDataBolzano5N[2503] = ++indexBolzano;
+        indexBufferDataBolzano5N[IBsize-1] = ++indexBolzano;
     }
 
     // metoda pro generování vertex bufferu pro trojuhelníkový grid
